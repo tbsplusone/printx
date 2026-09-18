@@ -13,8 +13,9 @@ $(TARGET): $(SRC) | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-run: $(TARGET)
-	./$(TARGET)
+.PHONY: test
+test: $(TARGET)
+	./test/bats/bin/bats -F pretty ./test/tests.bats
 
 clean:
 	rm -f $(TARGET)

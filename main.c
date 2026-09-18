@@ -52,6 +52,11 @@ int opt_parse(
     }
     return i;
 }
+
+void print_usage(void) {
+    fprintf(stderr, "usage: printx [-h, --help | -v, --version | -a VAR] FORMAT [ARGUMENT]...\n");
+}
+
 int main([[maybe_unused]] int argc, char** argv) {
     bool isHelp = false;
     bool isVersion = false;
@@ -68,7 +73,7 @@ int main([[maybe_unused]] int argc, char** argv) {
     }
 
     if (argIdx < 0) {
-        fprintf(stderr, "usage: printx [-h, --help | -v, --version | -a VAR] FORMAT [ARGUMENT]...\n");
+        print_usage();
         return EXIT_FAILURE;
     }
 
@@ -84,6 +89,7 @@ int main([[maybe_unused]] int argc, char** argv) {
             "   -a, --assing VAR   assign result to variable VAR\n"
             "\n"
             "FORMAT sequences:\n"
+            "   \\n   prints a newline\n"
             "   %%s   ARGUMENT is printed as string\n"
             "   %%%%   a single %%\n"
         );
@@ -93,16 +99,20 @@ int main([[maybe_unused]] int argc, char** argv) {
 
     if (isVersion) {
         printf("%s\n", GIT_VERSION);
+        return EXIT_SUCCESS;
     }
 
     if (argv[argIdx] == nullptr) {
-        fprintf(stderr, "usage: printx [-h, --help | -v, --version | -a VAR] FORMAT [ARGUMENT]...\n");
+        fprintf(stderr, "error: format not specified\n");
+        print_usage();
         return EXIT_FAILURE;
     }
     char* format = argv[argIdx++];
     if (isDebug) {
         printf("format = %s\n", format);
     }
+
+    printf(format);
 
     return EXIT_SUCCESS;
 }
