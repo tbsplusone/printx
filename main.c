@@ -44,7 +44,7 @@ int opt_parse(
                 fprintf(stderr, "error: value is not provided for -a / --assign\n");
                 return -1;
             }
-            *assign = argv[i++];
+            *assign = argv[++i];
         } else {
             fprintf(stderr, "error: unknown option %s\n", argv[i]);
             return -1;
@@ -93,6 +93,15 @@ int main([[maybe_unused]] int argc, char** argv) {
 
     if (isVersion) {
         printf("%s\n", GIT_VERSION);
+    }
+
+    if (argv[argIdx] == nullptr) {
+        fprintf(stderr, "usage: printx [-h, --help | -v, --version | -a VAR] FORMAT [ARGUMENT]...\n");
+        return EXIT_FAILURE;
+    }
+    char* format = argv[argIdx++];
+    if (isDebug) {
+        printf("format = %s\n", format);
     }
 
     return EXIT_SUCCESS;
