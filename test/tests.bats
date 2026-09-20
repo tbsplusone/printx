@@ -10,7 +10,7 @@ setup() {
     # make executables in src/ visible to PATH
     PATH="$DIR/../bin:$PATH"
 
-    GIT_VERSION=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match)
+    GIT_VERSION=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match || echo "undefined")
 }
 
 
@@ -37,8 +37,9 @@ OPTIONS:
 
 FORMAT sequences:
    \n   prints a newline
-   %s   ARGUMENT is printed as string
-   %%   a single %'
+   \\   prints a single \
+   %s   prints ARGUMENT as string
+   %%   prints a single %'
 
     run printx -h
     assert_success
@@ -59,6 +60,39 @@ FORMAT sequences:
     run printx -- --version
     assert_success
     assert_output '--version'
+}
+
+@test "prints newline on \n" {
+    run printx 'test\nnewline'
+    assert_success
+    assert_output \
+'test
+newline'
+}
+
+@test "prints \ on \\\\" {
+    run printx 'test\\nnewline'
+    assert_success
+    assert_output \
+'test\nnewline'
+}
+
+@test "prints string arg on %s" {
+    run printx 'test %s arg' string
+    assert_success
+    assert_output 'test string arg'
+}
+
+@test "prints nothing on missing string arg" {
+    run printx 'test %s arg'
+    assert_success
+    assert_output 'test  arg'
+}
+
+@test "prints % on %%" {
+    run printx 'test %%s'
+    assert_success
+    assert_output 'test %s'
 }
 
 @test "prints error on empty run" {

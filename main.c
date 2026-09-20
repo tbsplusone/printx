@@ -57,6 +57,44 @@ void print_usage(void) {
     fprintf(stderr, "usage: printx [-h, --help | -v, --version | -a VAR] FORMAT [ARGUMENT]...\n");
 }
 
+typedef struct {
+    char* buff;
+    int capacity;
+    int length;
+} DynamicArr;
+
+DynamicArr dynamic_arr_init(int numChars) {
+    DynamicArr arr;
+    arr.buff = malloc(sizeof(char) * numChars);
+    arr.capacity = numChars;
+    arr.length = 0;
+    return arr;
+}
+
+void dynamic_arr_destroy(DynamicArr *arr) {
+    if (arr->buff != nullptr) {
+        free(arr->buff);
+        arr->buff = nullptr;
+    }
+    arr->capacity = 0;
+    arr->length = 0;
+}
+
+void dynamic_arr_add(DynamicArr *arr, char ch) {
+    if (arr->length == arr->capacity) {
+        arr->capacity = arr->capacity == 0 ? 8 : arr->capacity * 2;
+        arr->buff = realloc(arr->buff, sizeof(char) * arr->capacity);
+    }
+    arr->buff[arr->length] = ch;
+    arr->length++;
+}
+
+void dynamic_arr_add_string(DynamicArr *arr, char* str) {
+    for (; *str != '\0'; str++) {
+        dynamic_arr_add(arr, *str);
+    }
+}
+
 int main([[maybe_unused]] int argc, char** argv) {
     bool isHelp = false;
     bool isVersion = false;
@@ -90,8 +128,9 @@ int main([[maybe_unused]] int argc, char** argv) {
             "\n"
             "FORMAT sequences:\n"
             "   \\n   prints a newline\n"
-            "   %%s   ARGUMENT is printed as string\n"
-            "   %%%%   a single %%\n"
+            "   \\\\   prints a single \\\n"
+            "   %%s   prints ARGUMENT as string\n"
+            "   %%%%   prints a single %%\n"
         );
 
         return EXIT_SUCCESS;
@@ -112,7 +151,40 @@ int main([[maybe_unused]] int argc, char** argv) {
         printf("format = %s\n", format);
     }
 
-    printf(format);
+    // TODO: implement/test assign
+    DynamicArr output = dynamic_arr_init(1024);
+    for (char* curr = format; *curr != '\0'; curr++) {
+        if (*curr == '\\') {
+            if (*(curr+1) == 'n') {
+                dynamic_arr_add(&output, '\n');
+                curr++;
+                continue;
+            }
+            if (*(curr+1) == '\\') {
+                dynamic_arr_add(&output, '\\');
+                curr++;
+                continue;
+            }
+        }
+        if (*curr == '%') {
+            if (*(curr+1) == 's') {
+                if (argv[argIdx] != nullptr) {
+                    dynamic_arr_add_string(&output, argv[argIdx++]);
+                }
+                curr++;
+                continue;
+            }
+            if (*(curr+1) == '%') {
+                dynamic_arr_add(&output, '%');
+                curr++;
+                continue;
+            }
+        }
+        dynamic_arr_add(&output, *curr);
+    }
+    dynamic_arr_add(&output, '\0');
+    printf("%s", output.buff);
 
+    dynamic_arr_destroy(&output);
     return EXIT_SUCCESS;
 }

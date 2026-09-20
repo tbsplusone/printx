@@ -1,5 +1,5 @@
 CC = gcc-14
-GIT_VERSION := $(shell git symbolic-ref -q --short HEAD || git describe --tags --exact-match)
+GIT_VERSION := $(shell git symbolic-ref -q --short HEAD || git describe --tags --exact-match || echo "undefined")
 CFLAGS = -std=c2x -Wall -Wextra -g -DGIT_VERSION=\"$(GIT_VERSION)\"
 BUILD_DIR = bin
 TARGET = $(BUILD_DIR)/printx
