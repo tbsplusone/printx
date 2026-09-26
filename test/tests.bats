@@ -33,7 +33,6 @@ OPTIONS:
    -h, --help         print this help
    -v, --version      print version
    -d, --debug        enable debug logging
-   -a, --assing VAR   assign result to variable VAR
 
 FORMAT sequences:
    \n   prints a newline
@@ -100,7 +99,7 @@ newline'
     assert_failure
     assert_output \
 'error: format not specified
-usage: printx [-h, --help | -v, --version | -a VAR] FORMAT [ARGUMENT]...'
+usage: printx [-h, --help | -v, --version] FORMAT [ARGUMENT]...'
 }
 
 @test "prints error on unknown option" {
@@ -108,27 +107,11 @@ usage: printx [-h, --help | -v, --version | -a VAR] FORMAT [ARGUMENT]...'
     assert_failure
     assert_output \
 'error: unknown option -u
-usage: printx [-h, --help | -v, --version | -a VAR] FORMAT [ARGUMENT]...'
+usage: printx [-h, --help | -v, --version] FORMAT [ARGUMENT]...'
 
     run printx --unknown
     assert_failure
     assert_output \
 'error: unknown option --unknown
-usage: printx [-h, --help | -v, --version | -a VAR] FORMAT [ARGUMENT]...'
-}
-
-@test "prints error on missing assign VAR" {
-    run printx -a
-    assert_failure
-    assert_output \
-'error: value is not provided for -a / --assign
-usage: printx [-h, --help | -v, --version | -a VAR] FORMAT [ARGUMENT]...'
-}
-
-@test "prints error on missing format" {
-    run printx -a STUB
-    assert_failure
-    assert_output \
-'error: format not specified
-usage: printx [-h, --help | -v, --version | -a VAR] FORMAT [ARGUMENT]...'
+usage: printx [-h, --help | -v, --version] FORMAT [ARGUMENT]...'
 }
