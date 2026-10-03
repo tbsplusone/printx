@@ -1,0 +1,48 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Tag version to release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Build
+        run: make
+
+      - name: Run tests
+        shell: bash
+        env:
+          TERM: xterm
+        run: make test
+
+      - name: Create Git Tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ inputs.version }}
+          git push origin ${{ inputs.version }}
+
+      - name: Create GitHub Release & Populate Notes
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          name: Release ${{ inputs.version }}
+          generate_release_notes: true
+          files: |
+            bin/printx
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
