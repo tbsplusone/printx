@@ -20,6 +20,18 @@ jobs:
         with:
           submodules: 'recursive'
 
+      - name: Create Git Tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ inputs.version }}
+          git push origin ${{ inputs.version }}
+
+      - name: Checkout Created Tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.version }}
+
       - name: Build
         run: make
 
@@ -28,13 +40,6 @@ jobs:
         env:
           TERM: xterm
         run: make test
-
-      - name: Create Git Tag
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag ${{ inputs.version }}
-          git push origin ${{ inputs.version }}
 
       - name: Create GitHub Release & Populate Notes
         uses: softprops/action-gh-release@v2
